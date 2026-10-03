@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import path from 'path';
 import { LibraryService } from './services/library-scanner';
 import { StorageService } from './services/storage';
@@ -66,10 +67,49 @@ ipcMain.handle('settings:set', async (_event, settings: any) => {
   return storageService.setSettings(settings);
 });
 
+function setupAutoUpdater() {
+  autoUpdater.checkForUpdatesAndNotify();
+
+  autoUpdater.on('update-available', () => {
+    if (mainWindow) {
+      dialog
+        .showMessageBox(mainWindow, {
+          type: 'info',
+          title: 'Update Available',
+          message: 'A new version of Medley Magic is available.',
+          buttons: ['Update Now', 'Later'],
+        })
+        .then((result) => {
+          if (result.response === 0) {
+            autoUpdater.downloadUpdate();
+          }
+        });
+    }
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    if (mainWindow) {
+      dialog
+        .showMessageBox(mainWindow, {
+          type: 'info',
+          title: 'Update Ready',
+          message: 'Update downloaded. Restart to install.',
+          buttons: ['Restart Now', 'Later'],
+        })
+        .then((result) => {
+          if (result.response === 0) {
+            autoUpdater.quitAndInstall();
+          }
+        });
+    }
+  });
+}
+
 app.on('ready', () => {
   libraryService = new LibraryService();
   storageService = new StorageService();
   createWindow();
+  setupAutoUpdater();
 });
 
 app.on('window-all-closed', () => {

@@ -13,6 +13,7 @@
     "dist:linux": "npm run build && electron-builder --linux"
   },
   "dependencies": {
+    "electron-updater": "^6.1.7",
     "react": "^19.0.0-rc.1",
     "react-dom": "^19.0.0-rc.1"
   },
@@ -35,6 +36,11 @@
     ],
     "directories": {
       "buildResources": "assets"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "GilbertZennerDev",
+      "repo": "medley-desktop"
     },
     "win": {
       "target": [
